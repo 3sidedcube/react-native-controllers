@@ -284,6 +284,10 @@ const NSInteger TRANSPARENT_NAVBAR_TAG = 78264803;
         for (UIBarButtonItem *item in viewController.navigationItem.rightBarButtonItems) {
             [item setTitleTextAttributes:navButtonTextAttributes forState:UIControlStateNormal];
         }
+        
+        // At the moment, this seems to be the only thing that gets the back button correctly
+        [[UIBarButtonItem appearance] setTitleTextAttributes:navButtonTextAttributes forState:UIControlStateNormal];
+        [viewController.navigationItem.backBarButtonItem setTitleTextAttributes:navButtonTextAttributes forState:UIControlStateNormal];
     }
   
   NSString *navBarButtonColor = self.navigatorStyle[@"navBarButtonColor"];
@@ -293,6 +297,9 @@ const NSInteger TRANSPARENT_NAVBAR_TAG = 78264803;
     viewController.navigationController.navigationBar.tintColor = color;
     
     if (appeared) {
+        
+      viewController.navigationItem.backBarButtonItem.tintColor = color;
+    
       for (UIBarButtonItem *item in viewController.navigationItem.leftBarButtonItems) {
         item.tintColor = color;
       }
