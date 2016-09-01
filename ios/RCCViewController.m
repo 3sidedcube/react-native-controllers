@@ -195,6 +195,70 @@ const NSInteger TRANSPARENT_NAVBAR_TAG = 78264803;
   [self setStyleOnAppearForViewController:self appeared:true];
 }
 
+- (NSDictionary *)textAttributesFromDictionary:(NSDictionary *)dictionary withPrefix:(NSString *)prefix
+{
+    NSMutableDictionary *textAttributes = [NSMutableDictionary new];
+    
+    NSString *colorKey = @"color";
+    NSString *familyKey = @"fontFamily";
+    NSString *weightKey = @"fontWeight";
+    NSString *sizeKey = @"fontSize";
+    NSString *styleKey = @"fontStyle";
+    
+    if (prefix) {
+        
+        colorKey = [colorKey stringByReplacingCharactersInRange:NSMakeRange(0, 1) withString:[colorKey substringToIndex:1].capitalizedString];
+        colorKey = [NSString stringWithFormat:@"%@%@", prefix, colorKey];
+        
+        familyKey = [familyKey stringByReplacingCharactersInRange:NSMakeRange(0, 1) withString:[familyKey substringToIndex:1].capitalizedString];
+        familyKey = [NSString stringWithFormat:@"%@%@", prefix, familyKey];
+        
+        weightKey = [weightKey stringByReplacingCharactersInRange:NSMakeRange(0, 1) withString:[weightKey substringToIndex:1].capitalizedString];
+        weightKey = [NSString stringWithFormat:@"%@%@", prefix, weightKey];
+        
+        sizeKey = [sizeKey stringByReplacingCharactersInRange:NSMakeRange(0, 1) withString:[sizeKey substringToIndex:1].capitalizedString];
+        sizeKey = [NSString stringWithFormat:@"%@%@", prefix, sizeKey];
+        
+        styleKey = [styleKey stringByReplacingCharactersInRange:NSMakeRange(0, 1) withString:[styleKey substringToIndex:1].capitalizedString];
+        styleKey = [NSString stringWithFormat:@"%@%@", prefix, styleKey];
+    }
+    
+    NSString *textColor = dictionary[colorKey];
+    if (textColor && [textColor isKindOfClass:[NSString class]])
+    {
+        UIColor *color = [RCTConvert UIColor:textColor];
+        [textAttributes setObject:color forKey:NSForegroundColorAttributeName];
+    }
+    
+    NSString *fontFamily = dictionary[familyKey];
+    if (![fontFamily isKindOfClass:[NSString class]]) {
+        fontFamily = nil;
+    }
+    
+    NSString *fontWeight = dictionary[weightKey];
+    if (![fontWeight isKindOfClass:[NSString class]]) {
+        fontWeight = nil;
+    }
+    
+    NSNumber *fontSize = dictionary[sizeKey];
+    if (![fontSize isKindOfClass:[NSNumber class]]) {
+        fontSize = nil;
+    }
+    
+    NSNumber *fontStyle = dictionary[styleKey];
+    if (![fontStyle isKindOfClass:[NSString class]]) {
+        fontStyle = nil;
+    }
+    
+    UIFont *font = [RCTConvert UIFont:[UIFont systemFontOfSize:17] withFamily:fontFamily size:fontSize weight:fontWeight style:fontStyle scaleMultiplier:1];
+    
+    if (font && (fontStyle || fontWeight || fontSize || fontFamily)) {
+        [textAttributes setObject:font forKey:NSFontAttributeName];
+    }
+    
+    return textAttributes;
+}
+
 -(void)setStyleOnAppearForViewController:(UIViewController*)viewController appeared:(BOOL)appeared
 {
   NSString *navBarBackgroundColor = self.navigatorStyle[@"navBarBackgroundColor"];
@@ -208,42 +272,19 @@ const NSInteger TRANSPARENT_NAVBAR_TAG = 78264803;
     viewController.navigationController.navigationBar.barTintColor = nil;
   }
   
-    NSMutableDictionary *titleTextAttributes = [NSMutableDictionary new];
-    
-    NSString *navBarTextColor = self.navigatorStyle[@"navBarTextColor"];
-  if (navBarTextColor && [navBarTextColor isKindOfClass:[NSString class]])
-  {
-      UIColor *color = [RCTConvert UIColor:navBarTextColor];
-      [titleTextAttributes setObject:color forKey:NSForegroundColorAttributeName];
-  }
-    
-    NSString *navBarTextFontFamily = self.navigatorStyle[@"navBarTextFontFamily"];
-    if (![navBarTextFontFamily isKindOfClass:[NSString class]]) {
-        navBarTextFontFamily = nil;
-    }
-    
-    NSString *navBarTextFontWeight = self.navigatorStyle[@"navBarTextFontWeight"];
-    if (![navBarTextFontWeight isKindOfClass:[NSString class]]) {
-        navBarTextFontWeight = nil;
-    }
-    
-    NSNumber *navBarTextFontSize = self.navigatorStyle[@"navBarTextFontSize"];
-    if (![navBarTextFontSize isKindOfClass:[NSNumber class]]) {
-        navBarTextFontSize = nil;
-    }
-    
-    NSNumber *navBarTextFontStyle = self.navigatorStyle[@"navBarTextFontStyle"];
-    if (![navBarTextFontStyle isKindOfClass:[NSString class]]) {
-        navBarTextFontSize = nil;
-    }
-    
-    UIFont *navBarFont = [RCTConvert UIFont:[UIFont systemFontOfSize:17] withFamily:navBarTextFontFamily size:navBarTextFontSize weight:navBarTextFontWeight style:navBarTextFontStyle scaleMultiplier:1];
-    
-    if (navBarFont) {
-        [titleTextAttributes setObject:navBarFont forKey:NSFontAttributeName];
-    }
-    
+    NSMutableDictionary *titleTextAttributes = [self textAttributesFromDictionary:self.navigatorStyle withPrefix:@"navBarText"];
     [viewController.navigationController.navigationBar setTitleTextAttributes:titleTextAttributes];
+    
+    NSMutableDictionary *navButtonTextAttributes = [self textAttributesFromDictionary:self.navigatorStyle withPrefix:@"navBarButton"];
+    
+    if (navButtonTextAttributes.allKeys.count > 0) {
+        for (UIBarButtonItem *item in viewController.navigationItem.leftBarButtonItems) {
+            [item setTitleTextAttributes:navButtonTextAttributes forState:UIControlStateNormal];
+        }
+        for (UIBarButtonItem *item in viewController.navigationItem.rightBarButtonItems) {
+            [item setTitleTextAttributes:navButtonTextAttributes forState:UIControlStateNormal];
+        }
+    }
   
   NSString *navBarButtonColor = self.navigatorStyle[@"navBarButtonColor"];
   if (navBarButtonColor)
