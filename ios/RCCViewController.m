@@ -137,7 +137,7 @@ const NSInteger TRANSPARENT_NAVBAR_TAG = 78264803;
   self.view = reactView;
   
   self.edgesForExtendedLayout = UIRectEdgeNone; // default
-  self.automaticallyAdjustsScrollViewInsets = NO; // default
+  self.automaticallyAdjustsScrollViewInsets = false; // default
   
   self.navigatorStyle = [NSMutableDictionary dictionaryWithDictionary:navigatorStyle];
   
@@ -348,6 +348,9 @@ const NSInteger TRANSPARENT_NAVBAR_TAG = 78264803;
     }
   }
   
+  NSNumber *autoAdjustsScrollViewInsets = self.navigatorStyle[@"autoAdjustScrollViewInsets"];
+  viewController.automaticallyAdjustsScrollViewInsets = autoAdjustsScrollViewInsets ? [autoAdjustsScrollViewInsets boolValue] : false;
+  
   NSNumber *navBarTranslucent = self.navigatorStyle[@"navBarTranslucent"];
   BOOL navBarTranslucentBool = navBarTranslucent ? [navBarTranslucent boolValue] : NO;
   if (navBarTranslucentBool || navBarBlurBool)
@@ -436,38 +439,14 @@ const NSInteger TRANSPARENT_NAVBAR_TAG = 78264803;
 // only styles that can't be set on willAppear should be set here
 - (void)setStyleOnInit
 {
-  NSNumber *tabBarHidden = self.navigatorStyle[@"tabBarHidden"];
-  BOOL tabBarHiddenBool = tabBarHidden ? [tabBarHidden boolValue] : NO;
-  if (tabBarHiddenBool)
-  {
-    self._hidesBottomBarWhenPushed = YES;
-  }
-  else
-  {
-    self._hidesBottomBarWhenPushed = NO;
-  }
-  
-  NSNumber *statusBarHideWithNavBar = self.navigatorStyle[@"statusBarHideWithNavBar"];
-  BOOL statusBarHideWithNavBarBool = statusBarHideWithNavBar ? [statusBarHideWithNavBar boolValue] : NO;
-  if (statusBarHideWithNavBarBool)
-  {
-    self._statusBarHideWithNavBar = YES;
-  }
-  else
-  {
-    self._statusBarHideWithNavBar = NO;
-  }
-  
-  NSNumber *statusBarHidden = self.navigatorStyle[@"statusBarHidden"];
-  BOOL statusBarHiddenBool = statusBarHidden ? [statusBarHidden boolValue] : NO;
-  if (statusBarHiddenBool)
-  {
-    self._statusBarHidden = YES;
-  }
-  else
-  {
-    self._statusBarHidden = NO;
-  }
+    NSNumber *tabBarHidden = self.navigatorStyle[@"tabBarHidden"];
+    self._hidesBottomBarWhenPushed = tabBarHidden ? [tabBarHidden boolValue] : false;
+    
+    NSNumber *statusBarHideWithNavBar = self.navigatorStyle[@"statusBarHideWithNavBar"];
+    self._statusBarHideWithNavBar = statusBarHideWithNavBar ? [statusBarHideWithNavBar boolValue] : false;
+    
+    NSNumber *statusBarHidden = self.navigatorStyle[@"statusBarHidden"];
+    self._statusBarHidden = statusBarHidden ? [statusBarHidden boolValue] : false;
 }
 
 - (BOOL)hidesBottomBarWhenPushed
