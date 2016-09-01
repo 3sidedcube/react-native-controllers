@@ -607,6 +607,8 @@ All styles are optional, this is the format of the style object:
   statusBarHidden: false, // make the status bar hidden regardless of nav bar state
   statusBarTextColorScheme: 'dark', // text color of status bar, 'dark' / 'light' (remembered across pushes)
   autoAdjustScrollViewInsets: true, // make the screen adjust any scroll view insets to account for the tab bar translucency
+  backgroundColor: '#ffffff', // background color of the view controller contained in the navigation bar
+  modalPresentationStyle: 'fullScreen' // How the view controller should be presented
 }
 ```
 
