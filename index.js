@@ -163,6 +163,10 @@ var Controllers = {
       setTitle: function (params) {
         RCCManager.NavigationControllerIOS(id, "setTitle", params);
       },
+      setStyle: function (params) {
+        _processProperties(params);
+        RCCManager.NavigationControllerIOS(id, "setStyle", params);
+      },
       resetTo: function (params) {
         var unsubscribes = [];
         if (params['style']) {
