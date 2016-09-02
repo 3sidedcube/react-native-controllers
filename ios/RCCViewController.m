@@ -302,17 +302,32 @@ const NSInteger TRANSPARENT_NAVBAR_TAG = 78264803;
   {
     viewController.navigationController.navigationBar.tintColor = nil;
   }
+    
+    BOOL viewControllerBasedStatusBar = false;
+    
+    NSObject *viewControllerBasedStatusBarAppearance = [[NSBundle mainBundle] infoDictionary][@"UIViewControllerBasedStatusBarAppearance"];
+    if (viewControllerBasedStatusBarAppearance && [viewControllerBasedStatusBarAppearance isKindOfClass:[NSNumber class]]) {
+        viewControllerBasedStatusBar = [(NSNumber *)viewControllerBasedStatusBarAppearance boolValue];
+    }
   
   NSString *statusBarTextColorScheme = self.navigatorStyle[@"statusBarTextColorScheme"];
-  if (statusBarTextColorScheme && [statusBarTextColorScheme isEqualToString:@"light"])
+  if (statusBarTextColorScheme && [statusBarTextColorScheme isEqualToString:@"light"] && !self._statusBarTextColorSchemeLight)
   {
-    viewController.navigationController.navigationBar.barStyle = UIBarStyleBlack;
-    self._statusBarTextColorSchemeLight = YES;
+      viewController.navigationController.navigationBar.barStyle = UIBarStyleBlack;
+      self._statusBarTextColorSchemeLight = true;
+      if (!viewControllerBasedStatusBarAppearance) {
+          [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent];
+      }
+      [self setNeedsStatusBarAppearanceUpdate];
   }
-  else
+  else if ((!statusBarTextColorScheme || ![statusBarTextColorScheme isEqualToString:@"light"]) && self._statusBarTextColorSchemeLight) // This makes sure we always default back to the default, otherwise if the user doesn't provide a style the style will be maintained when pushing/popping
   {
     viewController.navigationController.navigationBar.barStyle = UIBarStyleDefault;
-    self._statusBarTextColorSchemeLight = NO;
+    self._statusBarTextColorSchemeLight = false;
+      if (!viewControllerBasedStatusBarAppearance) {
+          [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleDefault];
+      }
+      [self setNeedsStatusBarAppearanceUpdate];
   }
   
   NSNumber *navBarHidden = self.navigatorStyle[@"navBarHidden"];
