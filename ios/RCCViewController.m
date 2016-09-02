@@ -318,7 +318,7 @@ const NSInteger TRANSPARENT_NAVBAR_TAG = 78264803;
       if (!viewControllerBasedStatusBarAppearance) {
           [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent];
       }
-      [self setNeedsStatusBarAppearanceUpdate];
+      [viewController setNeedsStatusBarAppearanceUpdate];
   }
   else if ((!statusBarTextColorScheme || ![statusBarTextColorScheme isEqualToString:@"light"]) && self._statusBarTextColorSchemeLight) // This makes sure we always default back to the default, otherwise if the user doesn't provide a style the style will be maintained when pushing/popping
   {
@@ -327,7 +327,7 @@ const NSInteger TRANSPARENT_NAVBAR_TAG = 78264803;
       if (!viewControllerBasedStatusBarAppearance) {
           [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleDefault];
       }
-      [self setNeedsStatusBarAppearanceUpdate];
+      [viewController setNeedsStatusBarAppearanceUpdate];
   }
   
   NSNumber *navBarHidden = self.navigatorStyle[@"navBarHidden"];
