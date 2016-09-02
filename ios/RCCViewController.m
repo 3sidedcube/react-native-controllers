@@ -7,6 +7,7 @@
 #import "RCCManager.h"
 #import "RCTConvert.h"
 #import "RCCExternalViewControllerProtocol.h"
+#import "RCTHelpers.h"
 
 NSString* const RCCViewControllerCancelReactTouchesNotification = @"RCCViewControllerCancelReactTouchesNotification";
 
@@ -195,70 +196,6 @@ const NSInteger TRANSPARENT_NAVBAR_TAG = 78264803;
   [self setStyleOnAppearForViewController:self appeared:true];
 }
 
-- (NSDictionary *)textAttributesFromDictionary:(NSDictionary *)dictionary withPrefix:(NSString *)prefix
-{
-    NSMutableDictionary *textAttributes = [NSMutableDictionary new];
-    
-    NSString *colorKey = @"color";
-    NSString *familyKey = @"fontFamily";
-    NSString *weightKey = @"fontWeight";
-    NSString *sizeKey = @"fontSize";
-    NSString *styleKey = @"fontStyle";
-    
-    if (prefix) {
-        
-        colorKey = [colorKey stringByReplacingCharactersInRange:NSMakeRange(0, 1) withString:[colorKey substringToIndex:1].capitalizedString];
-        colorKey = [NSString stringWithFormat:@"%@%@", prefix, colorKey];
-        
-        familyKey = [familyKey stringByReplacingCharactersInRange:NSMakeRange(0, 1) withString:[familyKey substringToIndex:1].capitalizedString];
-        familyKey = [NSString stringWithFormat:@"%@%@", prefix, familyKey];
-        
-        weightKey = [weightKey stringByReplacingCharactersInRange:NSMakeRange(0, 1) withString:[weightKey substringToIndex:1].capitalizedString];
-        weightKey = [NSString stringWithFormat:@"%@%@", prefix, weightKey];
-        
-        sizeKey = [sizeKey stringByReplacingCharactersInRange:NSMakeRange(0, 1) withString:[sizeKey substringToIndex:1].capitalizedString];
-        sizeKey = [NSString stringWithFormat:@"%@%@", prefix, sizeKey];
-        
-        styleKey = [styleKey stringByReplacingCharactersInRange:NSMakeRange(0, 1) withString:[styleKey substringToIndex:1].capitalizedString];
-        styleKey = [NSString stringWithFormat:@"%@%@", prefix, styleKey];
-    }
-    
-    NSNumber *textColor = dictionary[colorKey];
-    if (textColor && [textColor isKindOfClass:[NSNumber class]])
-    {
-        UIColor *color = [RCTConvert UIColor:textColor];
-        [textAttributes setObject:color forKey:NSForegroundColorAttributeName];
-    }
-    
-    NSString *fontFamily = dictionary[familyKey];
-    if (![fontFamily isKindOfClass:[NSString class]]) {
-        fontFamily = nil;
-    }
-    
-    NSString *fontWeight = dictionary[weightKey];
-    if (![fontWeight isKindOfClass:[NSString class]]) {
-        fontWeight = nil;
-    }
-    
-    NSNumber *fontSize = dictionary[sizeKey];
-    if (![fontSize isKindOfClass:[NSNumber class]]) {
-        fontSize = nil;
-    }
-    
-    NSNumber *fontStyle = dictionary[styleKey];
-    if (![fontStyle isKindOfClass:[NSString class]]) {
-        fontStyle = nil;
-    }
-    
-    UIFont *font = [RCTConvert UIFont:[UIFont systemFontOfSize:17] withFamily:fontFamily size:fontSize weight:fontWeight style:fontStyle scaleMultiplier:1];
-    
-    if (font && (fontStyle || fontWeight || fontSize || fontFamily)) {
-        [textAttributes setObject:font forKey:NSFontAttributeName];
-    }
-    
-    return textAttributes;
-}
-
 -(void)setStyleOnAppearForViewController:(UIViewController*)viewController appeared:(BOOL)appeared
 {
   NSString *navBarBackgroundColor = self.navigatorStyle[@"navBarBackgroundColor"];
@@ -272,10 +209,10 @@ const NSInteger TRANSPARENT_NAVBAR_TAG = 78264803;
     viewController.navigationController.navigationBar.barTintColor = nil;
   }
   
-    NSMutableDictionary *titleTextAttributes = [self textAttributesFromDictionary:self.navigatorStyle withPrefix:@"navBarText"];
+    NSMutableDictionary *titleTextAttributes = [RCTHelpers textAttributesFromDictionary:self.navigatorStyle withPrefix:@"navBarText"];
     [viewController.navigationController.navigationBar setTitleTextAttributes:titleTextAttributes];
     
-    NSMutableDictionary *navButtonTextAttributes = [self textAttributesFromDictionary:self.navigatorStyle withPrefix:@"navBarButton"];
+    NSMutableDictionary *navButtonTextAttributes = [RCTHelpers textAttributesFromDictionary:self.navigatorStyle withPrefix:@"navBarButton"];
     
     if (navButtonTextAttributes.allKeys.count > 0) {
         for (UIBarButtonItem *item in viewController.navigationItem.leftBarButtonItems) {
@@ -311,16 +248,17 @@ const NSInteger TRANSPARENT_NAVBAR_TAG = 78264803;
     }
   
   NSString *statusBarTextColorScheme = self.navigatorStyle[@"statusBarTextColorScheme"];
-  if (statusBarTextColorScheme && [statusBarTextColorScheme isEqualToString:@"light"] && !self._statusBarTextColorSchemeLight)
+  if (statusBarTextColorScheme && [statusBarTextColorScheme isEqualToString:@"light"])
   {
       viewController.navigationController.navigationBar.barStyle = UIBarStyleBlack;
       self._statusBarTextColorSchemeLight = true;
       if (!viewControllerBasedStatusBarAppearance) {
           [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent];
       }
+      
       [viewController setNeedsStatusBarAppearanceUpdate];
   }
-  else if ((!statusBarTextColorScheme || ![statusBarTextColorScheme isEqualToString:@"light"]) && self._statusBarTextColorSchemeLight) // This makes sure we always default back to the default, otherwise if the user doesn't provide a style the style will be maintained when pushing/popping
+  else
   {
     viewController.navigationController.navigationBar.barStyle = UIBarStyleDefault;
     self._statusBarTextColorSchemeLight = false;
