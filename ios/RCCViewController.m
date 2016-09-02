@@ -223,8 +223,8 @@ const NSInteger TRANSPARENT_NAVBAR_TAG = 78264803;
         styleKey = [NSString stringWithFormat:@"%@%@", prefix, styleKey];
     }
     
-    NSString *textColor = dictionary[colorKey];
-    if (textColor && [textColor isKindOfClass:[NSString class]])
+    NSNumber *textColor = dictionary[colorKey];
+    if (textColor && [textColor isKindOfClass:[NSNumber class]])
     {
         UIColor *color = [RCTConvert UIColor:textColor];
         [textAttributes setObject:color forKey:NSForegroundColorAttributeName];
@@ -286,8 +286,10 @@ const NSInteger TRANSPARENT_NAVBAR_TAG = 78264803;
         }
         
         // At the moment, this seems to be the only thing that gets the back button correctly
+        
+        [navButtonTextAttributes removeObjectForKey:NSForegroundColorAttributeName];
         [[UIBarButtonItem appearance] setTitleTextAttributes:navButtonTextAttributes forState:UIControlStateNormal];
-        [viewController.navigationItem.backBarButtonItem setTitleTextAttributes:navButtonTextAttributes forState:UIControlStateNormal];
+//        [viewController.navigationItem.backBarButtonItem setTitleTextAttributes:navButtonTextAttributes forState:UIControlStateNormal];
     }
   
   NSString *navBarButtonColor = self.navigatorStyle[@"navBarButtonColor"];
@@ -295,31 +297,10 @@ const NSInteger TRANSPARENT_NAVBAR_TAG = 78264803;
   {
     UIColor *color = navBarButtonColor != (id)[NSNull null] ? [RCTConvert UIColor:navBarButtonColor] : nil;
     viewController.navigationController.navigationBar.tintColor = color;
-    
-    if (appeared) {
-        
-      viewController.navigationItem.backBarButtonItem.tintColor = color;
-    
-      for (UIBarButtonItem *item in viewController.navigationItem.leftBarButtonItems) {
-        item.tintColor = color;
-      }
-      for (UIBarButtonItem *item in viewController.navigationItem.rightBarButtonItems) {
-        item.tintColor = color;
-      }
-    }
   }
   else
   {
     viewController.navigationController.navigationBar.tintColor = nil;
-    
-    if (appeared) {
-      for (UIBarButtonItem *item in viewController.navigationItem.leftBarButtonItems) {
-        item.tintColor = nil;
-      }
-      for (UIBarButtonItem *item in viewController.navigationItem.rightBarButtonItems) {
-        item.tintColor = nil;
-      }
-    }
   }
   
   NSString *statusBarTextColorScheme = self.navigatorStyle[@"statusBarTextColorScheme"];
@@ -361,7 +342,7 @@ const NSInteger TRANSPARENT_NAVBAR_TAG = 78264803;
       UIVisualEffectView *blur = [[UIVisualEffectView alloc] initWithEffect:[UIBlurEffect effectWithStyle:UIBlurEffectStyleLight]];
       blur.frame = [[UIApplication sharedApplication] statusBarFrame];
       blur.tag = BLUR_STATUS_TAG;
-      [viewController.view addSubview:blur];
+      [viewController.view insertSubview:blur atIndex:0];
     }
   }
   
@@ -373,14 +354,15 @@ const NSInteger TRANSPARENT_NAVBAR_TAG = 78264803;
     {
       [self storeOriginalNavBarImages];
       
-      [self.navigationController.navigationBar setBackgroundImage:[UIImage new] forBarMetrics:UIBarMetricsDefault];
-      self.navigationController.navigationBar.shadowImage = [UIImage new];
+      [viewController.navigationController.navigationBar setBackgroundImage:[UIImage new] forBarMetrics:UIBarMetricsDefault];
+      viewController.navigationController.navigationBar.shadowImage = [UIImage new];
       UIVisualEffectView *blur = [[UIVisualEffectView alloc] initWithEffect:[UIBlurEffect effectWithStyle:UIBlurEffectStyleLight]];
       CGRect statusBarFrame = [[UIApplication sharedApplication] statusBarFrame];
-      blur.frame = CGRectMake(0, -1 * statusBarFrame.size.height, self.navigationController.navigationBar.frame.size.width, self.navigationController.navigationBar.frame.size.height + statusBarFrame.size.height);
+      blur.frame = CGRectMake(0, -1 * statusBarFrame.size.height, viewController.navigationController.navigationBar.frame.size.width, viewController.navigationController.navigationBar.frame.size.height + statusBarFrame.size.height);
       blur.userInteractionEnabled = NO;
       blur.tag = BLUR_NAVBAR_TAG;
-      [self.navigationController.navigationBar insertSubview:blur atIndex:0];
+      [viewController.navigationController.navigationBar insertSubview:blur atIndex:0];
+        [viewController.navigationController.navigationBar sendSubviewToBack:blur];
     }
   }
   else
